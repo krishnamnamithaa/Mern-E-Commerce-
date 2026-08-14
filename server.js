@@ -19,16 +19,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const path = require('path');
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 
-// Basic route
-app.get('/', (req, res) => {
-  res.json({ message: 'MERN E-Commerce API is running!' });
-});
+// Production static assets serving
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client', 'dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.json({ message: 'MERN E-Commerce API is running!' });
+  });
+}
 
 // Database connection logic with automatic Memory Server fallback
 async function connectDB() {
